@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tali's Chemistry Flashcards</title>
+<style>
+:root{--bg:#f6f8f7;--card:#fff;--ink:#1d2b2a;--mut:#5d6f6d;--line:#dbe4e2;--acc:#1f8a7a;--acc2:#e3f3f0;--ok:#2e8b57;--part:#c98a1b;--bad:#c4503f}
+@media (prefers-color-scheme:dark){:root{--bg:#121a19;--card:#1a2523;--ink:#e6efed;--mut:#9bb0ad;--line:#2b3a38;--acc:#4cc2af;--acc2:#1f3532;--ok:#58c489;--part:#e0a93f;--bad:#e5806f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0}h2{font-size:1.15rem;margin:1.4rem 0 .6rem}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:var(--acc2);color:var(--ink);border-radius:99px;padding:4px 12px;font-size:.9rem}
+.sub{color:var(--mut);margin:.2rem 0 1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.topic{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left;color:var(--ink);font:inherit;cursor:pointer}
+.topic:hover,.topic:focus-visible{border-color:var(--acc);outline:none}
+.topic b{display:block}.topic small{color:var(--mut)}
+.bar{height:7px;background:var(--line);border-radius:9px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}
+button.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;cursor:pointer}
+button.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.btn:disabled{opacity:.5}
+textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;background:var(--bg);color:var(--ink);resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tag{font-size:.8rem;color:var(--mut)}
+.res{border-left:4px solid var(--line);padding:8px 12px;margin-top:12px;background:var(--bg);border-radius:6px}
+.res.ok{border-color:var(--ok)}.res.part{border-color:var(--part)}.res.bad{border-color:var(--bad)}
+.pts li{margin:2px 0}.hit{color:var(--ok)}.miss{color:var(--bad)}
+.prog{height:6px;background:var(--line);border-radius:9px;margin:6px 0 14px}.prog i{display:block;height:100%;background:var(--acc);border-radius:9px}
+.big{font-size:2.4rem;font-weight:700;margin:.2rem 0}
+a,.link{color:var(--acc);cursor:pointer;background:none;border:0;font:inherit;padding:0}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+// ---------- Content (prototype seed bank; Higher-tier style, original wording) ----------
+// k = key points; each is a list of regex alternatives (any match earns that point).
+const TOPICS={
+1:"Key concepts in chemistry",2:"States of matter and mixtures",3:"Chemical changes",
+4:"Extracting metals and equilibria",5:"Separate chemistry 1 (triple)",6:"Groups in the periodic table",
+7:"Rates of reaction and energy changes",8:"Fuels and Earth science",9:"Separate chemistry 2 (triple)"};
+const C=(t,q,a,k)=>({t,q,a,k});
+const CARDS=[
+C(1,"Explain why graphite conducts electricity but diamond does not.","In graphite each carbon bonds to three others, leaving one delocalised electron per atom that can move and carry charge. In diamond each carbon forms four covalent bonds, so there are no free electrons.",[["delocali[sz]ed|free electron|mobile electron"],["three (covalent )?bonds|bond(ed|s)? to three|three others|layers"],["four (covalent )?bonds|no (free|delocali[sz]ed)|all (four )?outer electrons"]]),
+C(1,"State the relative charge and relative mass of a neutron.","Relative charge 0 (neutral); relative mass 1.",[["neutral|no charge|zero|\\b0\\b"],["\\b1\\b|one"]]),
+C(1,"Calculate the relative formula mass (Mr) of calcium carbonate, CaCO3. (Ca = 40, C = 12, O = 16)","40 + 12 + (3 √ó 16) = 100",[["\\b100\\b"]]),
+C(1,"How many moles are in 11 g of carbon dioxide, CO2? (Mr = 44)","moles = mass √∑ Mr = 11 √∑ 44 = 0.25 mol",[["0\\.25|quarter|1/4"]]),
+C(2,"Describe how you would obtain pure salt crystals from salt solution.","Heat the solution to evaporate some of the water, then leave to cool so crystals form (crystallisation); filter and dry the crystals.",[["evaporat|heat"],["crystalli[sz]|crystals|cool"]]),
+C(2,"Why does a pure substance melt at one sharp temperature, but a mixture melts over a range?","A pure substance contains only one type of particle so melts at a fixed temperature; a mixture contains different substances so melts over a range of temperatures.",[["fixed|sharp|specific|exact|one temperature"],["range|impure|mixture"]]),
+C(2,"Name the technique used to separate a mixture of liquids with different boiling points.","Fractional distillation (simple distillation if only one liquid has to be collected).",[["distillation"]]),
+C(2,"How is the Rf value calculated in paper chromatography?","Rf = distance moved by the substance √∑ distance moved by the solvent (front).",[["distance.*(substance|spot|compound|dye)"],["solvent"]]),
+C(3,"Complete the word equation: acid + metal carbonate ‚Üí","salt + water + carbon dioxide",[["salt"],["water"],["carbon dioxide|co2"]]),
+C(3,"At which electrode are metals formed during electrolysis, and why?","At the cathode (negative electrode), because metal ions are positive and are attracted to the negative electrode where they gain electrons.",[["cathode|negative electrode"],["positive|cation|metal ions?|gain"]]),
+C(3,"Why is aluminium extracted by electrolysis rather than by heating with carbon?","Aluminium is more reactive than carbon, so carbon cannot displace (reduce) it.",[["more reactive than carbon|above carbon|higher than carbon|carbon (is )?(less|not) reactive|carbon cannot|cannot be reduced"]]),
+C(3,"Define oxidation in terms of electrons.","Oxidation is the loss of electrons.",[["loss|lose|loses|losing"],["electron"]]),
+C(4,"Explain how iron oxide is turned into iron in a blast furnace.","Carbon monoxide (from carbon) removes the oxygen from iron oxide: the iron oxide is reduced to iron.",[["reduc|removes? (the )?oxygen|oxygen (is )?removed"],["carbon|carbon monoxide|\\bco\\b"]]),
+C(4,"State the conditions used in the Haber process.","About 450 ¬∞C, 200 atmospheres pressure, iron catalyst.",[["450"],["200 ?atm|200 atmospheres|high pressure"],["iron|catalyst"]]),
+C(4,"What is meant by dynamic equilibrium?","In a closed system, the rate of the forward reaction equals the rate of the reverse reaction, so concentrations stay constant.",[["rate.*(forward|equal|same)|equal rates?|same rate"],["closed|constant|unchanged|stay the same|don.?t change"]]),
+C(4,"What happens to the position of equilibrium if pressure is increased?","It shifts to the side with fewer moles (molecules) of gas.",[["fewer|less|smaller"],["gas|mol"]]),
+C(5,"What is an alloy, and why is it harder than a pure metal?","An alloy is a mixture of a metal with another element. The different-sized atoms distort the layers so they cannot slide over each other easily.",[["mixture|two or more|mixed"],["different (sized|size)|distort|slide|slip|layers"]]),
+C(5,"Give two ways transition metals differ from Group 1 metals.","Higher melting points and density, harder and stronger, form coloured compounds, act as catalysts, ions with different charges.",[["higher (melting|density)|dense|harder|stronger|high melting"],["coloured|colored|catalyst|different charges|more than one"]]),
+C(5,"Name two stages used to make potable (safe drinking) water from fresh water.","Filtration (to remove solids) and sterilisation (e.g. chlorine, ozone, UV) to kill microbes.",[["filter|filtration|sedimentation"],["steri?li[sz]|chlorin|ozone|uv|ultraviolet"]]),
+C(5,"What size range defines a nanoparticle?","Between 1 and 100 nanometres (nm) across.",[["1 ?(and|-|to|‚Äì) ?100"],["nm|nanomet"]]),
+C(6,"Explain why reactivity increases down Group 1.","Atoms have more shells, so the outer electron is further from the nucleus and more shielded; attraction is weaker, so it is lost more easily.",[["more shells|further from (the )?nucleus|bigger atom|larger atom"],["weaker|less (attraction|attracted)|shield"],["lose|loses|lost|easier|more easily"]]),
+C(6,"State and explain the trend in reactivity down Group 7.","Reactivity decreases down the group: the outer shell is further from the nucleus, so the atom attracts an extra electron less strongly.",[["decreas|less reactive|gets weaker"],["gain|attract|further|more shells"]]),
+C(6,"What are the products when sodium reacts with water?","Sodium hydroxide (alkaline solution) and hydrogen gas.",[["sodium hydroxide|naoh"],["hydrogen|\\bh2\\b"]]),
+C(6,"Why are the noble gases unreactive?","They have full outer shells of electrons, so they do not need to gain, lose or share electrons.",[["full|complete|stable"],["outer|shell|electron"]]),
+C(7,"Explain, using collision theory, why increasing temperature increases the rate of reaction.","Particles move faster and have more energy, so they collide more often and a greater proportion of collisions have energy above the activation energy.",[["faster|more (kinetic )?energy"],["more (often|frequent)|more collisions|collide more|frequency"],["activation energy|greater proportion|more successful"]]),
+C(7,"What does a catalyst do and how does it work?","It speeds up a reaction without being used up, by providing an alternative pathway with a lower activation energy.",[["speed|increase.*rate|faster"],["lower|reduce|alternative"],["not (being )?(used up|consumed|changed)|unchanged|remains|without being"]]),
+C(7,"Describe what happens to energy and temperature in an exothermic reaction.","Energy is transferred to the surroundings, so the temperature of the surroundings rises.",[["to the surroundings|released|gives? out|transfers?|out"],["temperature.*(rise|increase)|rise|hotter|warmer|increase"]]),
+C(7,"Define activation energy.","The minimum energy particles need to collide and react.",[["minimum|least|smallest"],["energy"],["collid|react|reaction"]]),
+C(8,"Name the process used to separate crude oil into fractions, and the property it depends on.","Fractional distillation; fractions have different boiling points.",[["fractional distillation|fractionating|distillation"],["boiling point"]]),
+C(8,"How do greenhouse gases cause global warming?","They absorb infrared (thermal) radiation emitted by Earth and re-emit it, trapping heat in the atmosphere.",[["absorb|trap"],["infra-?red|heat|thermal|radiation"]]),
+C(8,"State the general formula of the alkanes.","CnH2n+2",[["cnh2n\\+2|c\\(?n\\)?h\\(?2n\\+2\\)?"]]),
+C(8,"Describe the test for an alkene and the positive result.","Add bromine water; it changes from orange to colourless.",[["bromine"],["colou?rless|decolou?ri[sz]"]]),
+C(9,"What is the functional group in alcohols?","‚ÄìOH (hydroxyl group)",[["\\boh\\b|-oh|hydroxyl|hydroxy"]]),
+C(9,"What is formed when ethanol is oxidised (for example by acidified potassium dichromate)?","Ethanoic acid (a carboxylic acid).",[["ethanoic acid|carboxylic acid|vinegar|acetic"]]),
+C(9,"Describe the test for chloride ions and the positive result.","Add dilute nitric acid then silver nitrate solution; a white precipitate forms.",[["silver nitrate|agno3"],["white"]]),
+C(9,"Describe the test for carbonate ions.","Add dilute acid; bubbles of gas that turn limewater cloudy (milky) show carbon dioxide.",[["acid"],["limewater|lime water"],["cloudy|milky"]])
+];
+CARDS.forEach((c,i)=>c.id=i);
+
+// Optional: URL of the AI marking service (see worker/mark.js). Leave empty for keyword marking only.
+const MARK_URL="";
+
+// ---------- Storage ----------
+const KEY="taliChem.v1",DAY=864e5,INTERVALS=[0,1,2,4,7,14];
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}};
+let S=Object.assign({cards:{},days:[],answered:0,last:null},load());
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const st=id=>S.cards[id]||(S.cards[id]={box:0,due:0,seen:0});
+const dayStr=d=>new Date(d).toISOString().slice(0,10);
+function streak(){let n=0,d=Date.now();if(!S.days.includes(dayStr(d)))d-=DAY;while(S.days.includes(dayStr(d))){n++;d-=DAY}return n}
+function mastery(t){const cs=CARDS.filter(c=>t==="all"||c.t==t);return Math.round(100*cs.filter(c=>st(c.id).box>=3).length/cs.length)}
+
+// ---------- Marking ----------
+function mark(card,ans){
+  const a=ans.toLowerCase(),b=a.replace(/[\s_]/g,"");
+  const hits=card.k.map(alts=>alts.some(p=>{const r=new RegExp(p,"i");return r.test(a)||r.test(b)}));
+  const n=hits.filter(Boolean).length,tot=card.k.length;
+  return{hits,n,tot,grade:n===tot?2:(n>0&&n>=tot/2?1:0)};
+}
+
+// ---------- Session ----------
+let run=null;
+function start(topic){
+  const pool=CARDS.filter(c=>topic==="all"||c.t==topic);
+  const now=Date.now();
+  const due=pool.filter(c=>st(c.id).seen&&st(c.id).due<=now&&st(c.id).box<5);
+  const fresh=pool.filter(c=>!st(c.id).seen);
+  const rest=pool.filter(c=>!due.includes(c)&&!fresh.includes(c));
+  const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+  const q=[...shuffle(due),...shuffle(fresh),...shuffle(rest)].slice(0,10);
+  run={topic,queue:q.map(c=>c.id),total:q.length,idx:0,score:0,pts:0,max:0,missed:[],retry:false,weak:{},phase:"ask"};
+  render();
+}
+async function submit(){
+  const c=CARDS[run.queue[run.idx]],ans=document.getElementById("ans").value;
+  run.ans=ans;const kw=mark(c,ans);run.res=kw;run.ai=null;
+  if(ans.trim()&&MARK_URL){ // AI marking only when a marking service URL is configured
+    run.phase="marking";render();const idx=run.idx;
+    try{
+      const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),12000);
+      const r=await fetch(MARK_URL,{method:"POST",headers:{"content-type":"application/json"},signal:ctl.signal,body:JSON.stringify({question:c.q,modelAnswer:c.a,answer:ans})});
+      clearTimeout(tm);
+      if(r.ok){const j=await r.json();if(run&&run.idx===idx&&[0,1,2].includes(j.grade)){run.ai=j;run.res={...kw,grade:j.grade}}}
+    }catch(e){}
+    if(!run||run.idx!==idx)return;
+  }
+  run.phase="marked";render();
+}
+function grade(g){ // 0 not yet, 1 nearly, 2 got it
+  const c=CARDS[run.queue[run.idx]],s=st(c.id);
+  s.seen++;
+  if(g===2){s.box=Math.min(5,s.box+1);run.score++}
+  else if(g===1){run.score+=0.5}
+  else{s.box=0}
+  s.due=Date.now()+INTERVALS[s.box]*DAY;
+  if(g<2&&!run.retry){run.missed.push(c.id);run.weak[c.t]=(run.weak[c.t]||0)+1}
+  S.answered++;if(!S.days.includes(dayStr(Date.now())))S.days.push(dayStr(Date.now()));
+  save();
+  run.idx++;
+  if(run.idx>=run.queue.length){
+    if(!run.retry&&run.missed.length){run.queue=run.queue.concat(run.missed);run.retry=true;run.phase="ask";run.notice="Round 2: revisiting the ones you missed";render();return}
+    S.last={score:run.score,total:run.total,topic:run.topic,at:Date.now()};save();run.phase="done";render();return}
+  run.phase="ask";run.notice="";render();
+}
+
+// ---------- Views ----------
+const $=s=>document.getElementById(s),app=$("app");
+const esc=t=>t.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+function header(){return `<header><h1>üß™ Tali's Chemistry</h1><div class="stats"><span class="pill">üî• ${streak()} day streak</span><span class="pill">${S.answered} answered</span><span class="pill">Mastery ${mastery("all")}%</span></div></header>`}
+function home(){
+  const last=S.last?`<div class="card">Last session: <b>${S.last.score}/${S.last.total}</b> (${S.last.topic==="all"?"mixed":"Topic "+S.last.topic}) <span class="tag">¬∑ ${new Date(S.last.at).toLocaleDateString("en-GB")}</span></div>`:"";
+  const dueN=CARDS.filter(c=>st(c.id).seen&&st(c.id).due<=Date.now()&&st(c.id).box<5).length;
+  app.innerHTML=header()+`<p class="sub">Type your answer, get marked, and cards you miss come back until you know them.</p>${last}
+  <div class="row"><button class="btn" onclick="start('all')">Mixed session (10 cards)</button>${dueN?`<span class="pill">${dueN} card${dueN>1?"s":""} due for review</span>`:""}</div>
+  <h2>Pick a topic</h2><div class="grid">${Object.entries(TOPICS).map(([t,n])=>`<button class="topic" onclick="start(${t})"><small>Topic ${t}</small><b>${n}</b><div class="bar"><i style="width:${mastery(t)}%"></i></div><small>${mastery(t)}% mastered ¬∑ ${CARDS.filter(c=>c.t==t).length} cards</small></button>`).join("")}</div>
+  <p class="tag" style="margin-top:28px">Prototype: ${CARDS.length} sample cards, keyword marking. AI-written cards and AI marking come next. <button class="link" onclick="if(confirm('Reset all progress?')){localStorage.removeItem(KEY);S={cards:{},days:[],answered:0,last:null};home()}">Reset progress</button></p>`;
+}
+function render(){
+  if(!run)return home();
+  if(run.phase==="done"){
+    const pct=Math.round(100*run.score/run.total);
+    const weak=Object.entries(run.weak).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`Topic ${t} ‚Äì ${TOPICS[t]} (${n} missed)`);
+    const msg=pct>=80?"Brilliant work!":pct>=50?"Good progress, keep going!":"Every miss is a card you'll know next time.";
+    app.innerHTML=header()+`<div class="card"><div class="tag">Session complete</div><div class="big">${run.score}/${run.total} ¬∑ ${pct}%</div><p>${msg}</p>${weak.length?`<b>To revisit</b><ul>${weak.map(w=>`<li>${w}</li>`).join("")}</ul>`:"<p>No misses. üéâ</p>"}<div class="row"><button class="btn" onclick="start(run.topic)">Another round</button><button class="btn alt" onclick="run=null;render()">Home</button></div></div>`;return;
+  }
+  const c=CARDS[run.queue[run.idx]],pct=Math.round(100*run.idx/run.queue.length);
+  let body=`<div class="tag">Topic ${c.t} ¬∑ ${TOPICS[c.t]}</div><p style="font-size:1.15rem;margin:.4rem 0 .8rem"><b>${esc(c.q)}</b></p>`;
+  if(run.phase==="ask"){
+    body+=`<textarea id="ans" placeholder="Type your answer‚Ä¶" autofocus></textarea><div class="row"><button class="btn" onclick="submit()">Check answer</button><button class="btn alt" onclick="document.getElementById('ans').value='';submit()">I don't know</button></div>`;
+  }else if(run.phase==="marking"){
+    body+=`<div class="res"><b>Marking your answer‚Ä¶</b></div>`;
+  }else{
+    const r=run.res,ai=run.ai,cls=r.grade===2?"ok":r.grade===1?"part":"bad",lab=r.grade===2?"Correct":r.grade===1?"Nearly there":"Not yet";
+    body+=`<div class="tag">Your answer</div><div>${esc(run.ans)||"<i>(blank)</i>"}</div>
+    <div class="res ${cls}"><b>${lab}</b>${ai?` <span class="tag">¬∑ AI marked</span><p style="margin:.4rem 0">${esc(ai.feedback)}</p><ul class="pts">${ai.got.map(x=>`<li class="hit">‚úì ${esc(x)}</li>`).join("")}${ai.missing.map(x=>`<li class="miss">‚úó ${esc(x)}</li>`).join("")}</ul>`:` ‚Äî ${r.n} of ${r.tot} key point${r.tot>1?"s":""} found <span class="tag">¬∑ keyword marking</span><ul class="pts">${r.hits.map((h,i)=>`<li class="${h?"hit":"miss"}">${h?"‚úì":"‚úó"} key point ${i+1}</li>`).join("")}</ul>`}</div>
+    <div class="res"><b>Model answer</b><br>${esc(c.a)}</div>
+    <p class="tag">Marking by keywords can miss good answers. Override if it's wrong:</p>
+    <div class="row"><button class="btn" onclick="grade(2)">I got it</button><button class="btn alt" onclick="grade(1)">Nearly</button><button class="btn alt" onclick="grade(0)">Not yet</button></div>`;
+  }
+  app.innerHTML=header()+(run.notice?`<p class="pill">${run.notice}</p>`:"")+`<div class="tag">Card ${run.idx+1} of ${run.queue.length}</div><div class="prog"><i style="width:${pct}%"></i></div><div class="card">${body}</div><button class="link" onclick="run=null;render()">‚Üê Quit to home</button>`;
+  const t=$("ans");if(t){t.focus();t.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))submit()})}
+}
+render();
+</script>
+</body>
+</html>
